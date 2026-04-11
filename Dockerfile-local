@@ -1,0 +1,26 @@
+
+# Use a slim, official Python runtime as a base image for a smaller image size
+FROM python:3.12.2-slim
+
+ARG FUNCTION_DIR="src"
+
+RUN mkdir -p ${FUNCTION_DIR}
+
+WORKDIR ${FUNCTION_DIR}
+
+ENV PYTHONPATH="/src"
+
+COPY requirements.txt ./
+
+RUN pip install --no-cache-dir -r requirements.txt && pip install debugpy
+
+COPY . .
+
+EXPOSE 9000
+
+CMD [ "python", "src/run_server.py"]
+
+EXPOSE 5678
+
+CMD python -m debugpy --log-to-stderr --listen 0.0.0.0:5678 ./run_server.py
+

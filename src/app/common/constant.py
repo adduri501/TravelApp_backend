@@ -1,0 +1,6 @@
+OTP_TABLE = "otp_table"
+DEVICE_TABLE = "device_table"
+USER_TABLE = "user_table"
+REFRESH_TOKEN_TABLE = "refresh_tokens_table"
+PASSENGER_TABLE = "passenger_table"
+DRIVER_TABLE = "driver_table"
