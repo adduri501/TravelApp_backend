@@ -12,12 +12,11 @@ class DriverRepository(BaseRepository[DriverTable]):
         self.entity = DriverEntity
         super().__init__(DriverTable, session=session)
 
-    async def create(self, entity: DriverEntity) -> DriverEntity:
-        driver_db_obj = utils.entity_to_model(entity=DriverEntity, model=DriverTable)
-
+    async def create(self, entity: DriverEntity):
+        driver_db_obj = utils.entity_to_model(entity=entity, model_class=DriverTable)
+        print(driver_db_obj.__dict__)
         self.session.add(driver_db_obj)
         await self.session.flush()  # 🔥 get ID without commit
-
         return utils.model_to_entity(driver_db_obj, DriverEntity)
 
     async def get_by_user_id(self, user_id: str) -> DriverEntity | None:
@@ -72,7 +71,6 @@ class DriverRepository(BaseRepository[DriverTable]):
         return user
 
     async def get_by_aadhaar(self, aadhaar_number: str = None):
-        print(aadhaar_number,747747474747747477474)
         stmt = select(self.model).where(self.model.aadhaar_number == aadhaar_number)
         result = await self.session.execute(stmt)
         user = result.scalars().first()
