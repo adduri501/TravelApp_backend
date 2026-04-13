@@ -31,6 +31,7 @@ async def send_otp(req_body: SendOtpRequest, session: AsyncSession = Depends(get
 
     response = {
         "expires_in_minutes": 5,
+        "generated_otp": generated_otp,
         "messages": "OTP sent successfully",
     }
     return response
@@ -155,22 +156,19 @@ async def auth_login(
     username: str, password: str, session: AsyncSession = Depends(get_db)
 ):
 
-    res =await  admin_service.super_admin_login_check(
+    res = await admin_service.super_admin_login_check(
         username=username, password=password, unit_of_work=UnitOfWork(session=session)
     )
     return res
-
-
 
 
 @auth_login_routes.post("/auth/admin/login")
 async def auth_login(
     username: str, password: str, session: AsyncSession = Depends(get_db)
 ):
-    print(username,password,1719777979137917979179)
+    print(username, password, 1719777979137917979179)
 
-    res =await  admin_service.admin_login_check(
+    res = await admin_service.admin_login_check(
         username=username, password=password, unit_of_work=UnitOfWork(session=session)
     )
     return res
-
