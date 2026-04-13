@@ -70,3 +70,9 @@ class UserRepository(BaseRepository[UserTable]):
     # async def create(self, user_data: dict):
     #     # insert into DB
     #     pass
+    async def get_all_passenger(self):
+        stmt = select(self.model).where(self.model.role == "passenger")
+        result = await self.session.execute(stmt)
+        users = result.scalars().all()
+        # users = utils.model_to_entity(user, UserEntity)
+        return users

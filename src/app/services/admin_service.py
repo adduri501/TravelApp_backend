@@ -43,7 +43,6 @@ async def create_driver(current_user, request, unit_of_work):
 
     async with unit_of_work as uow:
         # 1. Authorization (super_admin only for now)
-        print(current_user,4646466464646464646466464)
         if current_user.get("role") not in ["super_admin", "admin"]:
             raise Exception("Only super admin and  admin allowed")
 
@@ -63,7 +62,6 @@ async def create_driver(current_user, request, unit_of_work):
             # If passenger → convert to driver OR reject
             raise Exception("User already exists with different role")
         # 5. Check duplicate Aadhaar (VERY IMPORTANT)
-        print(request.aadhaar_number,66656565665656565665656)
         existing_driver = await uow.driver_repo.get_by_aadhaar(request.aadhaar_number)
         if existing_driver:
             raise Exception("Driver already exists with this Aadhaar number")
@@ -78,6 +76,7 @@ async def create_driver(current_user, request, unit_of_work):
         )
 
         new_user = await uow.user_repo.add_user(user_entity)
+        print(new_user.id, 81818818188181881818)
         # 7. Create DriverEntity
         driver_entity = DriverEntity(
             user_id=new_user.id,
@@ -91,22 +90,22 @@ async def create_driver(current_user, request, unit_of_work):
         if request.dob:
             driver_entity.dob = request.dob
 
-        await uow.driver_repo.add_driver(driver_entity)
+        await uow.driver_repo.create(driver_entity)
 
-        return {"message": "Driver created successfully", "user_id": str(new_user.id)}
+        return {
+            "message": "Driver created successfully",
+            "user_id": str(new_user.id),
+            "role": new_user.role,
+        }
 
 
 async def admin_login_check(username, password, unit_of_work: UnitOfWork):
     async with unit_of_work as uow:
-        print(username, 99999999999999999)
         admin = await uow.user_repo.get_by_username(username=username)
-        print(admin.password_hash,677667676677667676766767)
         if not admin:
             raise Exception(
                 "Incorrect Username !, Please enter correct usernmae and try again "
             )
-        
-        print(admin.password_hash,101010010101010010100101001010)
 
         matched_password = await utils.match_password(
             password=password, stored_pw=admin.password_hash
@@ -119,11 +118,10 @@ async def admin_login_check(username, password, unit_of_work: UnitOfWork):
         return {"access_token": result, "role": "admin"}
 
 
-
 async def super_admin_login_check(username, password, unit_of_work: UnitOfWork):
     async with unit_of_work as uow:
         super_admin = await uow.user_repo.get_by_username(username=username)
-        
+
         if not super_admin:
             raise Exception(
                 "Incorrect Username !, Please enter correct usernmae and try again "
@@ -138,7 +136,19 @@ async def super_admin_login_check(username, password, unit_of_work: UnitOfWork):
         expire = timedelta(days=15)
         result = auth.create_access_token(data=data, expires_delta=expire)
         return {"access_token": result, "role": "super_admin"}
-        # refresh_token, token_id, expire = auth.create_refresh_token(str(user_id))
-        # await save_refresh_token(
-        #     user_id, token_id, device_obj.id, expire, unit_of_work=unit_of_work
-        # )
+
+
+async def view_all_passengers(current_user, unit_of_work):
+    async with unit_of_work as uow:
+        if current_user.get("role") not in ["super_admin", "admin"]:
+            raise Exception("Only super admin can create admin")
+
+        all_passengers = await uow.user_repo.get_all_passenger()
+        return all_passengers
+
+async def view_all_drivers(current_user, unit_of_work):
+    async with unit_of_work as uow:
+        if current_user.get("role") not in ["super_admin", "admin"]:
+            raise Exception("Only super admin can create admin")
+        all_passengers = await uow.user_repo.get_all_drivers()
+        return all_passengers

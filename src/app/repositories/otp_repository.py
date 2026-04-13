@@ -1,7 +1,7 @@
 from app.entities.otp_entity import OtpEntity
 from app.repositories.base_repository import BaseRepository
 from app.orm.models.otp_model import OtpTable
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select,and_
 from app.common import utils
 
 
@@ -19,8 +19,8 @@ class OtpRepository(BaseRepository[OtpTable]):
     async def get_many(self, limit, offset):
         return super().get_many(limit, offset)
 
-    async def get_one(self, mobile_number):
-        stmt = select(self.model).where(self.model.mobile_number == mobile_number)
+    async def get_one(self, mobile_number,otp_code):
+        stmt = select(self.model).where(and_(self.model.mobile_number == mobile_number,self.model.otp==otp_code))
         result = await self.session.execute(stmt)
         otp_obj = result.scalars().first()
         # otp_obj= utils.model_to_entity(otp_obj, self.entity)
