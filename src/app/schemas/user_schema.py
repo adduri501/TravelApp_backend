@@ -61,8 +61,8 @@ class VerifyOtpRequest(BaseModel):
     mobile_number: str
     otp_code: str
     device: str
-    device_token: str
-    role:Optional[str]="passenger"
+    device_token: Optional[str] = None
+    role: Optional[str] = "passenger"
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     model_config = ConfigDict(extra="allow")

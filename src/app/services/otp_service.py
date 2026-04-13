@@ -47,6 +47,9 @@ async def verify_otp_service(req_body, unit_of_work: UnitOfWork):
         otp_entry = await unit_of_work.otp_repo.get_one(
             req_body.mobile_number, req_body.otp_code
         )
+        otp_entry = await unit_of_work.otp_repo.get_one(
+            req_body.mobile_number, req_body.otp_code
+        )
 
         _validate_exist(otp_entry)
         _validate_expiry(otp_entry)
@@ -61,31 +64,38 @@ async def verify_otp_service(req_body, unit_of_work: UnitOfWork):
             )
         otp_entry.is_used = True
 
-        # user, is_created = await user_service.create_user(
-        #     req_body, unit_of_work=unit_of_work
-        # )
-        # user_id = user.id
+        user, is_exist = await user_service.create_user(
+            req_body, unit_of_work=unit_of_work
+        )
+        user_id = user.id
         # req_body.user_id = user_id
         # profile_update = not all([user.name, user.email, user.gender])
         # device_obj = await device_service.check_device(
         #     req_body=req_body, unit_of_work=unit_of_work
         # )
         access_token = auth.create_access_token(
-            data={"phone": req_body.mobile_number, "role": req_body.role}
+            data={
+                "sub": str(user_id),
+                "phone": req_body.mobile_number,
+                "role": req_body.role,
+            }
         )
         # refresh_token, token_id, expire = auth.create_refresh_token(str(user_id))
+        # refresh_token, token_id, expire = auth.create_refresh_token(str(user_id))
         # await unit_of_work.refresh_token.save_refresh_token(user_id, token_id, expire)
+        # await save_refresh_token(
+        #     user_id, token_id, device_obj.id, expire, unit_of_work=unit_of_work
+        # )
         # await save_refresh_token(
         #     user_id, token_id, device_obj.id, expire, unit_of_work=unit_of_work
         # )
 
         return {
             "access_token": access_token,
-            "role": req_body.role,
             # "refresh_token": refresh_token,
             "token_type": "bearer",
             "login_type": "otp",
-            # "is_first_login": is_created,
+            "is_exist": is_exist,
             # "profile_update": profile_update,
             "expires_in": 900,
             # "user_id": user_id,
