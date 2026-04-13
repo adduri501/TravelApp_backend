@@ -14,19 +14,20 @@ async def check_device(req_body, unit_of_work: UnitOfWork):
             device_entry.longitude = device_entry.longitude
 
         else:
+            print(17177171717717171717177117171717)
             now = datetime.now(timezone.utc)
-            device_entry = UserDeviceEntity(
+            device_entity = UserDeviceEntity(
                 user_id=req_body.user_id,
                 device_token=req_body.device_token,
                 latitude=req_body.latitude,
                 longitude=req_body.longitude,
                 last_login=now,
             )
-            res = await unit_of_work.device_repo.create(device_entry)
-            print(res, 2626626266266266262662626262)
+            device_entry = await unit_of_work.device_repo.create(device_entry)
+            # print(res, 2626626266266266262662626262)
         await unit_of_work.commit()
 
-        return res
+        return device_entry
 
 
 async def create_device(req_body, unit_of_work: UnitOfWork):

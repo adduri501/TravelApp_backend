@@ -157,6 +157,7 @@ async def auth_login(
 ):
 
     res = await admin_service.super_admin_login_check(
+    res = await admin_service.super_admin_login_check(
         username=username, password=password, unit_of_work=UnitOfWork(session=session)
     )
     return res
@@ -167,7 +168,9 @@ async def auth_login(
     username: str, password: str, session: AsyncSession = Depends(get_db)
 ):
     print(username, password, 1719777979137917979179)
+    print(username, password, 1719777979137917979179)
 
+    res = await admin_service.admin_login_check(
     res = await admin_service.admin_login_check(
         username=username, password=password, unit_of_work=UnitOfWork(session=session)
     )
