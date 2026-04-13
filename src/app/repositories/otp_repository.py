@@ -1,7 +1,7 @@
 from app.entities.otp_entity import OtpEntity
 from app.repositories.base_repository import BaseRepository
 from app.orm.models.otp_model import OtpTable
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select, and_
 from app.common import utils
 
 
@@ -19,8 +19,10 @@ class OtpRepository(BaseRepository[OtpTable]):
     async def get_many(self, limit, offset):
         return super().get_many(limit, offset)
 
-    async def get_one(self, mobile_number):
-        stmt = select(self.model).where(self.model.mobile_number == mobile_number)
+    async def get_one(self, mobile_number, otp_code):
+        stmt = select(self.model).where(
+            and_(self.model.mobile_number == mobile_number, self.model.otp == otp_code)
+        )
         result = await self.session.execute(stmt)
         otp_obj = result.scalars().first()
         # otp_obj= utils.model_to_entity(otp_obj, self.entity)
@@ -33,7 +35,7 @@ class OtpRepository(BaseRepository[OtpTable]):
         await self.session.refresh(db_obj)
         return utils.model_to_entity(db_obj, OtpEntity)
 
-    async def update(self, db_obj:OtpTable, obj_in):
+    async def update(self, db_obj: OtpTable, obj_in):
         valid_columns = self.model.__table__.columns.keys()
         for key, value in obj_in.items():
             if key in valid_columns:
@@ -43,5 +45,3 @@ class OtpRepository(BaseRepository[OtpTable]):
         return db_obj
 
         # return utils.model_to_entity(db_obj,OtpTable)
-
-

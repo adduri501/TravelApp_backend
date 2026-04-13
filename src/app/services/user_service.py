@@ -43,7 +43,7 @@ async def create_user(req_body, unit_of_work: UnitOfWork):
             mobile_number=req_body.mobile_number
         )
         if user:
-            return user, False
+            return user, True
         user_entity_obj = UserEntity(
             mobile_number=req_body.mobile_number if req_body.mobile_number else None,
             role=req_body.role if hasattr(req_body, "role") else None,
@@ -56,7 +56,7 @@ async def create_user(req_body, unit_of_work: UnitOfWork):
             gender=getattr(req_body, "gender", None),
         )
         user = await unit_of_work.user_repo.add_user(user_entity_obj)
-        return user, True
+        return user, False 
 
 
 async def update_user(user_id: UUID, update_data: dict, unit_of_work: UnitOfWork):
