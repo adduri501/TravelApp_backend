@@ -63,3 +63,14 @@ async def get_trip_by_id(trip_id, unit_of_work):
             raise Exception("Trip not found")
 
         return trip   
+async def search_trips(starting_date, from_location, to_location, seats, unit_of_work):
+    async with unit_of_work as uow:
+
+        trips = await uow.trip_repo.search_trips(
+            starting_date,
+            from_location,
+            to_location,
+            seats
+        )
+
+        return trips

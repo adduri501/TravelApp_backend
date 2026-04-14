@@ -4,6 +4,8 @@ from app.schemas.trip_schema import CreateTripRequest, UpdateTripRequest
 from app.services import trip_service
 from app.services.unit_of_work import UnitOfWork
 from app.common.db_config import get_db
+from typing import Optional
+from datetime import date
 
 
 trip_route = APIRouter(prefix="/api", tags=["Trip"])
@@ -59,4 +61,18 @@ async def delete_trip(
         UnitOfWork(session=session),
     )
 
-
+@trip_route.get("/search-trips")
+async def search_trips(
+    starting_date: Optional[date] = None,
+    from_location: Optional[str] = None,
+    to_location: Optional[str] = None,
+    seats: Optional[int] = None,
+    session: AsyncSession = Depends(get_db),
+):
+    return await trip_service.search_trips(
+        starting_date,
+        from_location,
+        to_location,
+        seats,
+        UnitOfWork(session=session),
+    )

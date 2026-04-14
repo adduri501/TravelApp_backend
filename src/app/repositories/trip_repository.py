@@ -4,6 +4,8 @@ from app.orm.models.trip_model import TripTable
 from app.entities.trip_entity import TripEntity
 from app.common import utils
 from sqlalchemy.orm import selectinload
+from app.orm.models.trip_model import TripTable
+from app.orm.models.vehicle_model import VehicleTable
 
 
 class TripRepository(BaseRepository):
@@ -45,42 +47,92 @@ class TripRepository(BaseRepository):
         await self.session.delete(db_obj)
         await self.session.flush()
  
-from app.orm.models.trip_model import TripTable
-from app.orm.models.vehicle_model import VehicleTable
 
 
-async def get_one(self, trip_id):
-    stmt = (
-        select(
-            TripTable,
-            VehicleTable.vehicle_name,
-            VehicleTable.color
+
+    async def get_one(self, trip_id):
+        stmt = (
+            select(
+                TripTable,
+                VehicleTable.vehicle_name,
+                VehicleTable.color
+            )
+            .join(
+                VehicleTable,
+                TripTable.vehicle_number == VehicleTable.vehicle_number
+            )
+            .where(TripTable.id == trip_id)
         )
-        .join(
-            VehicleTable,
-            TripTable.vehicle_number == VehicleTable.vehicle_number
-        )
-        .where(TripTable.id == trip_id)
-    )
 
-    result = await self.session.execute(stmt)
-    row = result.first()
+        result = await self.session.execute(stmt)
+        row = result.first()
 
-    if not row:
-        return None
+        if not row:
+            return None
 
-    trip, vehicle_name, color = row
+        trip, vehicle_name, color = row
 
-    return {
-        "id": str(trip.id),
-        "name": trip.name,
-        "vehicle_number": trip.vehicle_number,
-        "vehicle_name": vehicle_name,
-        "color": color,
-        "starting_date": trip.starting_date,
-        "starting_time": trip.starting_time,
-        "available_seats": trip.available_seats,
-        "amount": trip.amount,
-        "from": trip.from_location,
-        "to": trip.to_location,
-    }
+        return {
+            "id": str(trip.id),
+            "name": trip.name,
+            "vehicle_number": trip.vehicle_number,
+            "vehicle_name": vehicle_name,
+            "color": color,
+            "starting_date": trip.starting_date,
+            "starting_time": trip.starting_time,
+            "available_seats": trip.available_seats,
+            "amount": trip.amount,
+            "from": trip.from_location,
+            "to": trip.to_location,
+        }
+
+    async def search_trips(
+    self,
+    starting_date=None,
+    from_location=None,
+    to_location=None,
+    seats=None,
+):
+        stmt = select(TripTable)
+
+        # ✅ Filters
+        if starting_date:
+            print("search api ",starting_date)
+            print("search api ",from_location)
+            print("search api ",to_location)
+            stmt = stmt.where(TripTable.starting_date == starting_date)
+
+        if from_location:
+            print("search api ",from_location)
+            stmt = stmt.where(
+                TripTable.from_location.ilike(f"%{from_location.strip()}%")
+            )
+
+        if to_location:
+            print("search api ",to_location)
+            stmt = stmt.where(
+                TripTable.to_location.ilike(f"%{to_location.strip()}%")
+            )
+
+        if seats:
+            stmt = stmt.where(TripTable.available_seats >= seats)
+
+        result = await self.session.execute(stmt)
+        trips = result.scalars().all()
+
+        return [
+            {
+                "id": str(trip.id),
+                "name": trip.name,
+                "vehicle_number": trip.vehicle_number,
+                "starting_date": trip.starting_date,
+                "starting_time": trip.starting_time,
+                "available_seats": trip.available_seats,
+                "amount": trip.amount,
+                "from_location": trip.from_location,
+                "to_location": trip.to_location,
+            }
+            for trip in trips
+        ]
+# print("FROM:", TripTable.from_location)
+# print("TO:", TripTable.to_location)     
