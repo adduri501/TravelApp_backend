@@ -6,6 +6,7 @@ from app.repositories.device_repository import DeviceRepository
 from app.repositories.refresh_token_repository import RefreshTokenRepo
 from app.repositories.passenger_repository import PassengerRepository
 from app.repositories.driver_repository import DriverRepository
+from app.repositories.vehicle_repository import VehicleRepository
 
 
 class BaseUnitOfWork(abc.ABC):
@@ -44,6 +45,7 @@ class UnitOfWork(BaseUnitOfWork):
         self.refresh_token = RefreshTokenRepo(self.session)
         self.passenger_repo = PassengerRepository(self.session)
         self.driver_repo = DriverRepository(self.session)
+        self.vehicle_repo = VehicleRepository(self.session)
 
     async def __aenter__(self):
         return await super().__aenter__()
