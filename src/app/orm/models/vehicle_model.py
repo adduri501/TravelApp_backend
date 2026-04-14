@@ -32,3 +32,4 @@ class VehicleTable(Base):
         server_default=func.now(),
         onupdate=func.now()
     )
+    trips = relationship("TripTable", back_populates="vehicle")

@@ -22,7 +22,13 @@ async def add_vehicle(
         request,
         UnitOfWork(session=session),
     )
-
+@vehicle_route.get("/admin/all-vehicles")
+async def get_all_vehicles(
+    session: AsyncSession = Depends(get_db),
+):
+    return await vehicle_service.get_all_vehicles(
+        UnitOfWork(session=session),
+    )
 
 @vehicle_route.put("/admin/update-vehicle/{vehicle_id}")
 async def update_vehicle(
@@ -48,16 +54,7 @@ async def delete_vehicle(
     )
 
 
-@vehicle_route.get("/admin/all-vehicles")
-async def get_all_vehicles(
-    session: AsyncSession = Depends(get_db),
-):
-    return await vehicle_service.get_all_vehicles(
-        UnitOfWork(session=session),
-    )
-
-
-@vehicle_route.get("/admin/{vehicle_id}")
+@vehicle_route.get("/admin/id/{vehicle_id}")
 async def get_vehicle(
     vehicle_id: str,
     session: AsyncSession = Depends(get_db),
