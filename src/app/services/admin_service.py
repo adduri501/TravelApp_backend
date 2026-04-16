@@ -90,11 +90,12 @@ async def create_driver(current_user, request, unit_of_work):
         if request.dob:
             driver_entity.dob = request.dob
 
-        await uow.driver_repo.create(driver_entity)
+        driver = await uow.driver_repo.create(driver_entity)
 
         return {
             "message": "Driver created successfully",
             "user_id": str(new_user.id),
+            "driver_id": str(driver.id),
             "role": new_user.role,
         }
 
@@ -143,12 +144,12 @@ async def view_all_passengers(current_user, unit_of_work):
         if current_user.get("role") not in ["super_admin", "admin"]:
             raise Exception("Only super admin can create admin")
 
-        all_passengers = await uow.user_repo.get_all_passenger()
-        return all_passengers
+        
+        all_drivers = await uow.driver_repo.get_all_drivers()  
+        return all_drivers
 
 async def view_all_drivers(current_user, unit_of_work):
     async with unit_of_work as uow:
         if current_user.get("role") not in ["super_admin", "admin"]:
             raise Exception("Only super admin can create admin")
-        all_passengers = await uow.user_repo.get_all_drivers()
-        return all_passengers
+        

@@ -14,6 +14,7 @@ class TripEntity:
         amount: float,
         from_location: Optional[str] = None,
         to_location: Optional[str] = None,
+        driver_id: Optional[uuid.UUID] = None,
         id: Optional[uuid.UUID] = None,
     ):
         self.id = id
@@ -25,3 +26,4 @@ class TripEntity:
         self.amount = amount
         self.from_location = from_location
         self.to_location = to_location
+        self.driver_id = driver_id 

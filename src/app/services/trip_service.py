@@ -14,6 +14,7 @@ async def create_trip(req, unit_of_work):
             amount=req.amount,
             from_location=req.from_location,
             to_location=req.to_location,
+            driver_id=req.driver_id
         )
 
         result = await uow.trip_repo.create(trip)
@@ -24,7 +25,7 @@ async def create_trip(req, unit_of_work):
 async def update_trip(trip_id, req, unit_of_work):
     async with unit_of_work as uow:
 
-        trip = await uow.trip_repo.get_one(trip_id)
+        trip = await uow.trip_repo.get_one_db(trip_id)
         if not trip:
             raise NotFoundException("Trip not found")
 
@@ -40,7 +41,7 @@ async def update_trip(trip_id, req, unit_of_work):
 async def delete_trip(trip_id, unit_of_work):
     async with unit_of_work as uow:
 
-        trip = await uow.trip_repo.get_one(trip_id)
+        trip = await uow.trip_repo.get_one_db(trip_id)
         if not trip:
             raise NotFoundException("Trip not found")
 
@@ -74,3 +75,26 @@ async def search_trips(starting_date, from_location, to_location, seats, unit_of
         )
 
         return trips
+async def assign_driver(trip_id, driver_id, unit_of_work):
+    async with unit_of_work as uow:
+
+        # check trip exists
+        trip = await uow.trip_repo.get_one_db(trip_id)
+        if not trip:
+            raise Exception("Trip not found")
+
+        # check driver exists
+        driver = await uow.driver_repo.get_by_id(driver_id)
+        if not driver:
+            raise Exception("Driver not found")
+
+        # ✅ directly update field (same session)
+        trip.driver_id = driver_id
+
+        await uow.commit()
+
+        return {
+            "message": "Driver assigned successfully",
+            "trip_id": trip_id,
+            "driver_id": driver_id
+        }

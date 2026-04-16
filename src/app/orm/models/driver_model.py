@@ -60,3 +60,4 @@ class DriverTable(Base):
         nullable=False,
     )
     user = relationship("UserTable", back_populates="driver")
+    trips = relationship("TripTable", back_populates="driver")

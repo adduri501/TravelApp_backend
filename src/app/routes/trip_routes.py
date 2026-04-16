@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends ,Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.trip_schema import CreateTripRequest, UpdateTripRequest
-from app.services import trip_service
+from app.services import trip_service 
 from app.services.unit_of_work import UnitOfWork
 from app.common.db_config import get_db
 from typing import Optional
 from datetime import date
+from app.services.trip_service import search_trips
 
 
 trip_route = APIRouter(prefix="/api", tags=["Trip"])
@@ -62,17 +63,18 @@ async def delete_trip(
     )
 
 @trip_route.get("/search-trips")
-async def search_trips(
-    starting_date: Optional[date] = None,
-    from_location: Optional[str] = None,
-    to_location: Optional[str] = None,
-    seats: Optional[int] = None,
-    session: AsyncSession = Depends(get_db),
+
+async def search_trips_route(
+    starting_date: date = Query(None),
+    from_location: str = Query(None),
+    to_location: str = Query(None),
+    seats: int = Query(None),
+    session: AsyncSession = Depends(get_db),  
 ):
-    return await trip_service.search_trips(
+    return await search_trips(
         starting_date,
         from_location,
         to_location,
         seats,
-        UnitOfWork(session=session),
+        UnitOfWork(session=session)   
     )
