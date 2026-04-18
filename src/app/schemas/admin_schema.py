@@ -7,7 +7,7 @@ class CreateAdminRequest(BaseModel):
     username: str
     password: str
     name: Optional[str] = None
-
+    role: Optional[str] = None
 
 
 class CreateDriverRequest(BaseModel):
@@ -19,3 +19,5 @@ class CreateDriverRequest(BaseModel):
     profile_pic: Optional[str] = None
     gender: Optional[str] = None
     dob: Optional[datetime] = None
+    role: Optional[str] = None
+

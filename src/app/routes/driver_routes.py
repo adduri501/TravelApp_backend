@@ -32,11 +32,16 @@ async def update_driver(
     await driver_service.update_driver(data, unit_of_work=UnitOfWork(session=session))
 
 
-@driver_route.patch("/driver/profile")
-async def partially_update_driver():
-    pass
+# @driver_route.patch("/driver/profile")
+# async def partially_update_driver():
+#     pass
 
 
-@driver_route.patch("/driver/verify")
-async def verify_driver():
-    pass
+# @driver_route.patch("/driver/verify")
+# async def verify_driver():
+#     pass
+
+
+# @driver_route.patch("/driver/profile")
+
+

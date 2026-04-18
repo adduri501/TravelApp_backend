@@ -55,18 +55,21 @@ class UserRepository(BaseRepository[UserTable]):
         return utils.model_to_entity(db_obj, UserEntity)
     
     async def get_by_username(self, username):
-        print(username,58585858858585588585858)
         # query DB where username = given
 
         stmt = select(self.model).where(self.model.username == username)
-        print(stmt,662662626262626262626266266262)
         result = await self.session.execute(stmt)
         user = result.scalars().first()
         # user = utils.model_to_entity(user, UserEntity)
-        print(user,6565566656565656656565656)
         return user
-        pass
+    
 
     # async def create(self, user_data: dict):
     #     # insert into DB
     #     pass
+    async def get_all_passenger(self):
+        stmt = select(self.model).where(self.model.role == "passenger")
+        result = await self.session.execute(stmt)
+        users = result.scalars().all()
+        # users = utils.model_to_entity(user, UserEntity)
+        return users

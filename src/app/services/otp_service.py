@@ -27,19 +27,7 @@ async def generate_otp():
 async def save_otp_in_db(req_body, unit_of_work: UnitOfWork):
     async with unit_of_work as uow:
         now = datetime.now(timezone.utc)
-        expire_limit = timedelta(minutes=15.0)
-        # try:
-        #     entity_obj = OtpEntity(
-        #         mobile_number=req_body.mobile_number,
-        #         otp=req_body.otp,
-        #         is_used=False,
-        #         attempted_count=1,
-        #         expire_at=now + expire_limit,
-        #     )
-        #     result_obj = await unit_of_work.otp_repo.save_otp(entity_obj)
-        # except Exception as e:
-        #     raise HTTPException(detail=f"Error occured :{e}, please retry",status_code=status.HTTP_400_BAD_REQUEST)
-        # return {"message": "otp saved successfully"}
+        expire_limit = timedelta(minutes=2)
 
         entity_obj = OtpEntity(
             mobile_number=req_body.mobile_number,
@@ -56,6 +44,9 @@ async def save_otp_in_db(req_body, unit_of_work: UnitOfWork):
 
 async def verify_otp_service(req_body, unit_of_work: UnitOfWork):
     async with unit_of_work:
+        otp_entry = await unit_of_work.otp_repo.get_one(
+            req_body.mobile_number, req_body.otp_code
+        )
         otp_entry = await unit_of_work.otp_repo.get_one(
             req_body.mobile_number, req_body.otp_code
         )
@@ -90,7 +81,11 @@ async def verify_otp_service(req_body, unit_of_work: UnitOfWork):
             }
         )
         # refresh_token, token_id, expire = auth.create_refresh_token(str(user_id))
+        # refresh_token, token_id, expire = auth.create_refresh_token(str(user_id))
         # await unit_of_work.refresh_token.save_refresh_token(user_id, token_id, expire)
+        # await save_refresh_token(
+        #     user_id, token_id, device_obj.id, expire, unit_of_work=unit_of_work
+        # )
         # await save_refresh_token(
         #     user_id, token_id, device_obj.id, expire, unit_of_work=unit_of_work
         # )
@@ -103,7 +98,7 @@ async def verify_otp_service(req_body, unit_of_work: UnitOfWork):
             "is_exist": is_exist,
             # "profile_update": profile_update,
             "expires_in": 900,
-            "user_id": user_id,
+            # "user_id": user_id,
         }
 
     # return {"message": "OTP validation successful"}
