@@ -32,5 +32,6 @@ class TripTable(Base):
         ForeignKey(f"{settings.DB_SCHEMA}.driver_table.id"),
         nullable=True
     )
+    status: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
 
     driver = relationship("DriverTable", back_populates="trips")
