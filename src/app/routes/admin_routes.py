@@ -25,13 +25,29 @@ async def create_driver(
     )
 
 
-@admin_route.get("/admin/create-driver")
-async def create_driver(
+
+@admin_route.get("/admin/passengers")
+async def all_passengers(
     current_user = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
 
 ):
-    return await admin_service.fetch_all_drivers(
+    return await admin_service.view_all_passengers(
+        current_user, unit_of_work=UnitOfWork(session=session)
+    )
+
+
+
+
+
+@admin_route.get("/admin/drivers")
+async def view_all_drivers(
+
+    current_user = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+
+):
+    return await admin_service.view_all_drivers(
         current_user, unit_of_work=UnitOfWork(session=session)
     )
 
