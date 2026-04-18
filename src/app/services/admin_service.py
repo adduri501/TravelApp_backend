@@ -5,6 +5,7 @@ from app.entities.driver_entity import DriverEntity
 from app.common import auth
 from datetime import datetime, timedelta, timezone
 from app.services.otp_service import save_refresh_token
+from app.common.exceptions import ConflictException
 
 
 async def create_admin(current_user, request, unit_of_work: UnitOfWork):
@@ -90,11 +91,12 @@ async def create_driver(current_user, request, unit_of_work):
         if request.dob:
             driver_entity.dob = request.dob
 
-        await uow.driver_repo.create(driver_entity)
+        driver = await uow.driver_repo.create(driver_entity)
 
         return {
             "message": "Driver created successfully",
             "user_id": str(new_user.id),
+            "driver_id": str(driver.id),
             "role": new_user.role,
         }
 
@@ -106,6 +108,7 @@ async def admin_login_check(username, password, unit_of_work: UnitOfWork):
             raise Exception(
                 "Incorrect Username !, Please enter correct usernmae and try again "
             )
+        
 
         matched_password = await utils.match_password(
             password=password, stored_pw=admin.password_hash
@@ -136,6 +139,12 @@ async def super_admin_login_check(username, password, unit_of_work: UnitOfWork):
         expire = timedelta(days=15)
         result = auth.create_access_token(data=data, expires_delta=expire)
         return {"access_token": result, "role": "super_admin"}
+        # refresh_token, token_id, expire = auth.create_refresh_token(str(user_id))
+        # await save_refresh_token(
+        #     user_id, token_id, device_obj.id, expire, unit_of_work=unit_of_work
+        # )
+
+
 
 
 async def view_all_passengers(current_user, unit_of_work):
@@ -143,12 +152,12 @@ async def view_all_passengers(current_user, unit_of_work):
         if current_user.get("role") not in ["super_admin", "admin"]:
             raise Exception("Only super admin can create admin")
 
-        all_passengers = await uow.user_repo.get_all_passenger()
-        return all_passengers
+        
+        all_drivers = await uow.driver_repo.get_all_drivers()  
+        return all_drivers
 
 async def view_all_drivers(current_user, unit_of_work):
     async with unit_of_work as uow:
         if current_user.get("role") not in ["super_admin", "admin"]:
             raise Exception("Only super admin can create admin")
-        all_passengers = await uow.user_repo.get_all_drivers()
-        return all_passengers
+        

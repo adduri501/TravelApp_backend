@@ -84,3 +84,16 @@ class DriverRepository(BaseRepository[DriverTable]):
 
     async def get_many(self):
         pass
+
+   
+
+    async def get_all_drivers(self):
+        stmt = select(DriverTable)
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
+    async def get_by_id(self, driver_id):
+        stmt = select(self.model).where(self.model.id == driver_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+            

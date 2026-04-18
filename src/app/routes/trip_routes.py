@@ -1,11 +1,19 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.trip_schema import CreateTripRequest, UpdateTripRequest
+from app.schemas.trip_schema import (
+    CreateTripRequest,
+    UpdateTripRequest,
+    UpdateStatusDriverSchema,
+)
 from app.services import trip_service
 from app.services.unit_of_work import UnitOfWork
+from app.common.auth import get_current_user
 from app.common.db_config import get_db
 from typing import Optional
 from datetime import date
+
+# from app.services.trip_service import search_trips
+from app.services import trip_service
 
 
 trip_route = APIRouter(prefix="/api", tags=["Trip"])
@@ -15,58 +23,74 @@ trip_route = APIRouter(prefix="/api", tags=["Trip"])
 async def create_trip(
     request: CreateTripRequest,
     session: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     return await trip_service.create_trip(
         request,
         UnitOfWork(session=session),
+        current_user=current_user,
     )
-    
+
+
 @trip_route.get("/admin/trips")
 async def get_all_trips(
     session: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     return await trip_service.get_all_trips(
         UnitOfWork(session=session),
+        current_user=current_user,
     )
+
+
 @trip_route.get("/admin/trips/{trip_id}")
 async def get_trip_by_id(
     trip_id: str,
     session: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     return await trip_service.get_trip_by_id(
         trip_id,
         UnitOfWork(session=session),
+        current_user=current_user,
     )
+
 
 @trip_route.put("/admin/update-trip/{trip_id}")
 async def update_trip(
     trip_id: str,
     request: UpdateTripRequest,
+    current_user=Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
 ):
     return await trip_service.update_trip(
         trip_id,
         request,
         UnitOfWork(session=session),
+        current_user=current_user,
     )
 
 
 @trip_route.delete("/admin/delete-trip/{trip_id}")
 async def delete_trip(
     trip_id: str,
+    current_user=Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
 ):
     return await trip_service.delete_trip(
         trip_id,
         UnitOfWork(session=session),
+        current_user=current_user,
     )
 
+
 @trip_route.get("/search-trips")
-async def search_trips(
-    starting_date: Optional[date] = None,
-    from_location: Optional[str] = None,
-    to_location: Optional[str] = None,
-    seats: Optional[int] = None,
+async def search_trips_route(
+    starting_date: date = Query(None),
+    from_location: str = Query(None),
+    to_location: str = Query(None),
+    seats: int = Query(None),
+    current_user=Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
 ):
     return await trip_service.search_trips(
@@ -75,4 +99,20 @@ async def search_trips(
         to_location,
         seats,
         UnitOfWork(session=session),
+        current_user=current_user,
+    )
+
+
+@trip_route.get("/driver/status")
+async def update_status_of_trip(
+    trip_id: str,
+    req_body: UpdateStatusDriverSchema,
+    # current_user = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+):
+    return await trip_service.update_status_of_trip(
+        UnitOfWork(session=session),
+        # current_user=current_user,
+        trip_id=trip_id,
+        status=req_body.status,
     )

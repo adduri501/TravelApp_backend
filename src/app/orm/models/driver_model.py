@@ -36,6 +36,7 @@ class DriverTable(Base):
         nullable=False,
         unique=True,  # 🔥 one user = one driver profile
     )
+    
 
     name: Mapped[str] = mapped_column(String(255), nullable=True)
 
@@ -60,3 +61,4 @@ class DriverTable(Base):
         nullable=False,
     )
     user = relationship("UserTable", back_populates="driver")
+    trips = relationship("TripTable", back_populates="driver")

@@ -7,7 +7,7 @@ from app.common.db_config import get_db
 import json
 from app.schemas.user_schema import UserUpdateSchema
 from uuid import UUID, uuid4
-# from app.common.auth import get_current_user
+from app.common.auth import get_current_user
 
 user_routes = APIRouter(prefix="/api", tags=["auth routes"])
 
@@ -32,7 +32,7 @@ async def update_user_info(
         examples=[str(uuid4())],
         description="The unique identifier for the metadata.",
     ),
-    # user=Depends(get_current_user),
+    current_user=Depends(get_current_user),
     data=UserUpdateSchema,
     session: AsyncSession = Depends(get_db),
 ):
@@ -41,6 +41,7 @@ async def update_user_info(
 
     response = await user_service.update_user(
         user_id=user_id,
+        current_user=current_user,
         update_data=data_to_update,
         unit_of_work=UnitOfWork(session=session),
     )

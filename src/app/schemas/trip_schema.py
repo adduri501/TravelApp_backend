@@ -5,6 +5,16 @@ from typing import Optional
 from datetime import datetime, date
 
 
+from enum import Enum
+
+
+class TripStatus(str, Enum):
+    SCHEDULED = "scheduled"
+    STARTED = "started"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
 class TripBase(BaseModel):
     name: str
     vehicle_number: str
@@ -14,6 +24,8 @@ class TripBase(BaseModel):
     amount: float
     from_location: Optional[str] = None
     to_location: Optional[str] = None
+    driver_id: Optional[str] = None
+    status: Optional[TripStatus] = "not started"
 
 
 class CreateTripRequest(TripBase):
@@ -29,3 +41,7 @@ class UpdateTripRequest(BaseModel):
     amount: Optional[float] = None
     from_location: Optional[str] = None
     to_location: Optional[str] = None
+
+
+class UpdateStatusDriverSchema(BaseModel):
+    status: TripStatus
