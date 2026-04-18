@@ -20,11 +20,20 @@ async def create_driver(
     session: AsyncSession = Depends(get_db),
 
 ):
-    print(current_user,32322332233232322323322332)
     return await admin_service.create_driver(
         current_user, request, unit_of_work=UnitOfWork(session=session)
     )
 
+
+@admin_route.get("/admin/create-driver")
+async def create_driver(
+    current_user = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+
+):
+    return await admin_service.fetch_all_drivers(
+        current_user, unit_of_work=UnitOfWork(session=session)
+    )
 
 
 

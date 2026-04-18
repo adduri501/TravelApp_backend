@@ -56,10 +56,12 @@ async def create_user(req_body, unit_of_work: UnitOfWork):
             gender=getattr(req_body, "gender", None),
         )
         user = await unit_of_work.user_repo.add_user(user_entity_obj)
-        return user, False 
+        return user, False
 
 
-async def update_user(user_id: UUID, update_data: dict, unit_of_work: UnitOfWork):
+async def update_user(
+    user_id: UUID, current_user, update_data: dict, unit_of_work: UnitOfWork
+):
     """
     Update an existing user's details in the database.
 
