@@ -14,6 +14,7 @@ class TripBase(BaseModel):
     amount: float
     from_location: Optional[str] = None
     to_location: Optional[str] = None
+    driver_id: Optional[str] = None 
 
 
 class CreateTripRequest(TripBase):

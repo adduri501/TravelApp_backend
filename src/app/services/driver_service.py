@@ -39,6 +39,18 @@ async def get_driver():
     pass
 
 
+async def view_all_drivers(current_user, unit_of_work):
+    async with unit_of_work as uow:
+
+        drivers = await uow.driver_repo.get_all_drivers()
+
+        return {
+            "success": True,
+            "data": drivers
+        }
+        
+        
+
 async def update_driver(user, update_data: dict, unit_of_work: UnitOfWork):
     async with unit_of_work as uow:
         existing_driver = await uow.driver_repo.get_by_user_id(user.id)
@@ -92,3 +104,4 @@ async def _validate_uniqueness(uow, req, exclude_user_id=None):
 
         if existing and existing.user_id != exclude_user_id:
             raise ConflictException("License already exists")
+        
