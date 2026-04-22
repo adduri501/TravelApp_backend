@@ -87,22 +87,18 @@ async def search_trips(
         return trips
 
 
-async def assign_driver(trip_id, driver_id, unit_of_work, current_user):
+async def assign_driver(trip_id, driver_id,  current_user,unit_of_work):
     async with unit_of_work as uow:
         if current_user.get("role") != "admin":
             raise AppException(detail="Only super admin can create admin")
 
-        # check trip exists
+       
         trip = await uow.trip_repo.get_one_db(trip_id)
         if not trip:
             raise Exception("Trip not found")
-
-        # check driver exists
         driver = await uow.driver_repo.get_by_id(driver_id)
         if not driver:
             raise Exception("Driver not found")
-
-        # ✅ directly update field (same session)
         trip.driver_id = driver_id
 
         await uow.commit()
@@ -114,26 +110,22 @@ async def assign_driver(trip_id, driver_id, unit_of_work, current_user):
         }
 
 
-async def update_status_of_trip(
-    trip_id,
-    # current_user,
-    req_body,
-    unit_of_work,
-):
+async def update_trip_status(trip_id, req_body, current_user, unit_of_work):
     async with unit_of_work as uow:
+
+
         trip = await uow.trip_repo.get_one_db(trip_id)
-        # check trip exists
         if not trip:
             raise Exception("Trip not found")
-        # if current_user.role == "driver":
-        # check driver exists
-        driver = await uow.driver_repo.get_by_id(trip.driver_id)
 
-        if not driver:
-            raise NotFoundException("Trips is not assigned to this particular Driver")
+        if trip.driver_id != current_user.get("driver_id"):
+            raise Exception("You are not assigned to this trip")
+
+        if req_body.status not in ["scheduled", "ongoing", "completed"]:
+            raise Exception("Invalid status")
 
         trip.status = req_body.status
-        # ✅ directly update field (same session)
+
         await uow.commit()
 
         return {

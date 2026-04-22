@@ -40,17 +40,27 @@ async def get_driver():
 
 
 async def view_all_drivers(current_user, unit_of_work):
-    async with unit_of_work as uow:
+    print("SERVICE CALLED")  # 🔍 must print
 
+    async with unit_of_work as uow:
         drivers = await uow.driver_repo.get_all_drivers()
 
+        # ALWAYS return JSON (not ORM objects)
         return {
             "success": True,
-            "data": drivers
+            "data": [
+                {
+                    "id": str(d.id),
+                    "name": d.name,
+                    "license_number": d.license_number,
+                    "aadhaar_number": d.aadhaar_number,
+                    "is_verified": d.is_verified,
+                    "address": d.address
+                }
+                for d in drivers
+            ]
         }
         
-        
-
 async def update_driver(user, update_data: dict, unit_of_work: UnitOfWork):
     async with unit_of_work as uow:
         existing_driver = await uow.driver_repo.get_by_user_id(user.id)

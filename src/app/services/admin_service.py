@@ -6,6 +6,7 @@ from app.common import auth
 from datetime import datetime, timedelta, timezone
 from app.services.otp_service import save_refresh_token
 from app.common.exceptions import ConflictException
+from app.common.exceptions import AppException
 
 
 async def create_admin(current_user, request, unit_of_work: UnitOfWork):
@@ -36,6 +37,7 @@ async def create_admin(current_user, request, unit_of_work: UnitOfWork):
             "message": "Admin created successfully",
             "user_id": str(new_user.id),
             "role": user_entity.role,
+          
         }
 
 
@@ -153,11 +155,87 @@ async def view_all_passengers(current_user, unit_of_work):
             raise Exception("Only super admin can create admin")
 
         
-        all_drivers = await uow.driver_repo.get_all_drivers()  
-        return all_drivers
+        all_passengers = await uow.user_repo.get_all_passengers()
+        return all_passengers
 
 async def view_all_drivers(current_user, unit_of_work):
     async with unit_of_work as uow:
         if current_user.get("role") not in ["super_admin", "admin"]:
-            raise Exception("Only super admin can create admin")
-        
+            raise Exception("Only admin can view drivers")
+
+        drivers = await uow.driver_repo.get_all_drivers()
+
+        return {
+            "success": True,
+            "data": [
+                {
+                    "id": str(d.id),
+                    "name": d.name,
+                    "license_number": d.license_number,
+                    "aadhaar_number": d.aadhaar_number,
+                    "is_verified": d.is_verified,
+                    "address": d.address
+                }
+                for d in drivers
+            ]
+        }
+
+async def create_coupon(current_user, request, unit_of_work):
+    async with unit_of_work as uow:
+
+        # 🔐 Only admin allowed
+        if current_user.get("role") not in ["admin", "super_admin"]:
+            raise AppException(detail="Only admin can create coupon")
+
+        # 🔍 Check existing coupon
+        existing = await uow.coupon_repo.get_by_code(request.code)
+
+        if existing:
+            raise AppException(detail="Coupon already exists")
+
+        # 📦 Create coupon
+        coupon = await uow.coupon_repo.create({
+            "code": request.code.upper(),
+            "discount_type": request.discount_type,
+            "discount_value": request.discount_value,
+            "min_amount": request.min_amount,
+            "usage_limit": request.usage_limit,
+            "used_count": 0,
+            "is_active": True,
+            "expiry_date": request.expiry_date,
+            "created_at": datetime.utcnow()
+        })
+
+        await uow.commit()
+
+        return {
+            "message": "Coupon created successfully",
+            "coupon_id": coupon.id
+        }
+
+async def get_all_coupons(current_user, unit_of_work):
+    async with unit_of_work as uow:
+
+        # 🔐 ROLE CHECK
+        if current_user.get("role") not in ["admin", "super_admin"]:
+            raise AppException(status_code=403, detail="Access denied")
+
+        coupons = await uow.coupon_repo.get_all()
+
+        return {
+            "success": True,
+            "data": [
+                {
+                    "id": c.id,
+                    "code": c.code,
+                    "discount_type": c.discount_type,
+                    "discount_value": c.discount_value,
+                    "min_amount": c.min_amount,
+                    "usage_limit": c.usage_limit,
+                    "used_count": c.used_count,
+                    "is_active": c.is_active,
+                    "expiry_date": c.expiry_date
+                }
+                for c in coupons
+            ]
+        }
