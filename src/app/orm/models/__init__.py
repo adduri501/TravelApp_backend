@@ -7,3 +7,6 @@ from app.orm.models.passenger_model import *
 from app.orm.models.driver_model import *
 from app.orm.models.trip_model import *
 from app.orm.models.vehicle_model import *
+from app.orm.models.vehicle_model import *
+from app.orm.models.booking_model import *
+from app.orm.models.coupon_model import *

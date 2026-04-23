@@ -8,6 +8,7 @@ from app.routes import super_admin_routes
 from app.routes import admin_routes
 from app.routes.vehicle_routes import vehicle_route
 from app.routes.trip_routes import trip_route
+from app.routes.booking_routes import booking_route
 
 from fastapi.responses import JSONResponse
 
@@ -52,6 +53,7 @@ travel_agency_api.include_router(super_admin_routes.super_admin_route)
 travel_agency_api.include_router(admin_routes.admin_route)
 travel_agency_api.include_router(vehicle_route)
 travel_agency_api.include_router(trip_route)
+travel_agency_api.include_router(booking_route)
 
 
 # defined exception handlers

@@ -47,9 +47,6 @@ class TripRepository(BaseRepository):
         await self.session.delete(db_obj)
         await self.session.flush()
  
-
-
-
     async def get_one(self, trip_id):
         stmt = (
             select(
@@ -161,4 +158,16 @@ class TripRepository(BaseRepository):
         }
         for trip, driver_name, vehicle_name in rows
     ]
-    
+    async def get_trip_for_update(self, trip_id):
+        stmt = (
+            select(TripTable)
+            .where(TripTable.id == trip_id)
+            .with_for_update() 
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
+    async def get_by_id(self, trip_id):
+        stmt = select(self.model).where(self.model.id == trip_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()

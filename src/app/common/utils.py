@@ -11,12 +11,15 @@ def entity_to_model(entity, model_class):
 
 
 def model_to_entity(model, entity_class):
+    entity_fields = entity_class.__init__.__code__.co_varnames
+
     data = {
-        column.name: getattr(model, column.name) for column in model.__table__.columns
+        column.name: getattr(model, column.name)
+        for column in model.__table__.columns
+        if column.name in entity_fields
     }
 
-    return entity_class(**data)
-
+    return entity_class(**data) 
 
 def generate_otp():
     otp = random.randint(100000, 999999)

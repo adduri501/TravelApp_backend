@@ -8,6 +8,8 @@ from app.repositories.passenger_repository import PassengerRepository
 from app.repositories.driver_repository import DriverRepository
 from app.repositories.vehicle_repository import VehicleRepository
 from app.repositories.trip_repository import TripRepository
+from app.repositories.booking_repository import BookingRepository
+from app.repositories.coupon_repository import CouponRepository
 
 
 class BaseUnitOfWork(abc.ABC):
@@ -48,6 +50,8 @@ class UnitOfWork(BaseUnitOfWork):
         self.driver_repo = DriverRepository(self.session)
         self.vehicle_repo = VehicleRepository(self.session)
         self.trip_repo = TripRepository(self.session)
+        self.booking_repo = BookingRepository(self.session)
+        self.coupon_repo = CouponRepository(self.session)
 
     async def __aenter__(self):
         return await super().__aenter__()
