@@ -95,6 +95,7 @@ async def verify_otp_service(req_body, unit_of_work: UnitOfWork):
             # "refresh_token": refresh_token,
             "token_type": "bearer",
             "login_type": "otp",
+            "role" : user.role ,
             "is_exist": is_exist,
             # "profile_update": profile_update,
             "expires_in": 900,
