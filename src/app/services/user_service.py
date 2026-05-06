@@ -1,8 +1,10 @@
 from app.services.unit_of_work import UnitOfWork
 from app.entities.user_entity import UserEntity
 from typing import Optional
-from uuid import UUID
+from uuid import UUID 
 from app.common import utils
+import uuid as uuid_lib
+print("UUID MODULE:", UUID)
 
 
 async def register_user(req_body: object, unit_of_work: UnitOfWork):
@@ -44,6 +46,12 @@ async def create_user(req_body, unit_of_work: UnitOfWork):
         )
         if user:
             return user, True
+        referred_by = None
+        if hasattr(req_body, "referral_code") and req_body.referral_code:
+            referrer = await uow.user_repo.get_by_referral_code(req_body.referral_code)
+
+            if referrer:
+                referred_by = referrer.referral_code
         user_entity_obj = UserEntity(
             mobile_number=req_body.mobile_number if req_body.mobile_number else None,
             role=req_body.role if hasattr(req_body, "role") else None,
@@ -54,6 +62,9 @@ async def create_user(req_body, unit_of_work: UnitOfWork):
             ),
             profile_pic=getattr(req_body, "profile_pic", None),
             gender=getattr(req_body, "gender", None),
+            referral_code=generate_referral_code(),
+            referred_by=referred_by,
+           
         )
         user = await unit_of_work.user_repo.add_user(user_entity_obj)
         return user, False
@@ -90,3 +101,6 @@ async def update_user(
                 "message": "User updated successfully",
             }
         return {"data": None, "message": "User not found with this ID!"}
+
+def generate_referral_code():
+    return uuid_lib.uuid4().hex[:6].upper()

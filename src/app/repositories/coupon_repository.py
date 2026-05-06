@@ -20,3 +20,8 @@ class CouponRepository:
         stmt = select(CouponTable)
         result = await self.session.execute(stmt)
         return result.scalars().all()
+    
+    async def get_by_id(self, coupon_id):
+        stmt = select(CouponTable).where(CouponTable.id == coupon_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()

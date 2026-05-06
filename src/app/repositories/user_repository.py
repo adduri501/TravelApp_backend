@@ -7,18 +7,33 @@ from sqlalchemy import or_, select
 from app.common import utils
 
 
+
 class UserRepository(BaseRepository[UserTable]):
+
     def __init__(self, session):
         self.model = UserTable
         self.entity = UserEntity
         super().__init__(UserTable, session=session)
 
     async def add_user(self, obj: UserEntity):
+        print("ENTITY REF:", obj.referral_code)
+
         db_obj = utils.entity_to_model(entity=obj, model_class=UserTable)
+
+        print("MODEL REF BEFORE:", getattr(db_obj, "referral_code", None))
+
+    # 🔧 force mapping
+        db_obj.referral_code = obj.referral_code
+        db_obj.referred_by = obj.referred_by
+
         self.session.add(db_obj)
         await self.session.commit()
         await self.session.refresh(db_obj)
+
+        print("MODEL REF AFTER:", db_obj.referral_code)
+
         return utils.model_to_entity(db_obj, UserEntity)
+        
 
     async def get_many(self):
         stmt = select(self.model)
@@ -73,3 +88,8 @@ class UserRepository(BaseRepository[UserTable]):
         users = result.scalars().all()
         # users = utils.model_to_entity(user, UserEntity)
         return users
+    
+    async def get_by_referral_code(self, code):
+        stmt = select(UserTable).where(UserTable.referral_code == code)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()

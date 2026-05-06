@@ -13,3 +13,4 @@ class BookTripRequest(BaseModel):
     seats: int
     applied_coupon_code: Optional[str] = None
     transaction_id: Optional[str] = None
+    use_wallet: Optional[bool] = False

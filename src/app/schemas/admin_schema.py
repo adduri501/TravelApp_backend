@@ -22,29 +22,12 @@ class CreateDriverRequest(BaseModel):
     role: Optional[str] = None
 
 
-async def create_coupon(current_user, request, unit_of_work):
-    async with unit_of_work as uow:
-
-        if current_user.get("role") not in ["admin", "super_admin"]:
-            raise Exception("Only admin can create coupons")
-
-        existing = await uow.coupon_repo.get_by_code(request.code)
-        if existing:
-            raise Exception("Coupon already exists")
-
-        coupon = await uow.coupon_repo.create({
-            "code": request.code.upper(),
-            "discount_type": request.discount_type,
-            "discount_value": request.discount_value,
-            "min_amount": request.min_amount,
-            "usage_limit": request.usage_limit,
-            "expiry_date": request.expiry_date,
-        })
-
-        await uow.commit()
-
-        return {
-            "message": "Coupon created",
-            "coupon_id": coupon.id
-        }
+class UpdateCouponRequest(BaseModel):
+    code: Optional[str] = None
+    discount_type: Optional[str] = None
+    discount_value: Optional[float] = None
+    min_amount: Optional[float] = None
+    usage_limit: Optional[int] = None
+    is_active: Optional[bool] = None
+    is_first_time_only: Optional[bool] = None
 

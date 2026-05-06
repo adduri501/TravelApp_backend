@@ -9,6 +9,7 @@ from app.services.unit_of_work import UnitOfWork
 from app.services import trip_service
 from app.services.admin_service import *
 from app.schemas.coupon_schema import*
+from app.schemas.admin_schema import UpdateCouponRequest
 
 
 admin_route = APIRouter(prefix="/api", tags=["admin routes"])
@@ -83,6 +84,33 @@ async def get_all_coupons_route(
     session: AsyncSession = Depends(get_db),
 ):
     return await admin_service.get_all_coupons(
+        current_user,
+        UnitOfWork(session=session)
+    )
+@admin_route.put("/admin/update-coupon/{coupon_id}")
+async def update_coupon_route(
+    coupon_id: str,
+    request: UpdateCouponRequest,
+    current_user = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+):
+    return await admin_service.update_coupon(
+        coupon_id,
+        request,
+        current_user,
+        UnitOfWork(session=session)
+    )
+    
+
+
+@admin_route.delete("/admin/delete-coupon/{coupon_id}")
+async def delete_coupon_route(
+    coupon_id: str,
+    current_user = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+):
+    return await admin_service.delete_coupon(
+        coupon_id,
         current_user,
         UnitOfWork(session=session)
     )

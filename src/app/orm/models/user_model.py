@@ -4,6 +4,7 @@ import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from app.common.constant import USER_TABLE
+from sqlalchemy import Column, String
 
 from sqlalchemy import (
     Table,
@@ -46,7 +47,11 @@ class UserTable(Base):
     username: Mapped[str] = mapped_column(String(100), unique=True, nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=True)
     role: Mapped[str] = mapped_column(String(50), nullable=True)
+    referral_code: Mapped[str] = mapped_column(String(20), unique=True, nullable=True)
+    referred_by: Mapped[str] = mapped_column(String(20), nullable=True)
     devices = relationship("DeviceTable", back_populates="user")
     refresh_tokens = relationship("RefreshTokenTable", backref="user")
     passenger = relationship("PassengerTable", back_populates="user", uselist=False)
     driver = relationship("DriverTable", back_populates="user", uselist=False)
+
+

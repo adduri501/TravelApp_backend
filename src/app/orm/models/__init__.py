@@ -10,3 +10,4 @@ from app.orm.models.vehicle_model import *
 from app.orm.models.vehicle_model import *
 from app.orm.models.booking_model import *
 from app.orm.models.coupon_model import *
+from app.orm.models.wallet_model import *
