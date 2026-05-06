@@ -9,3 +9,4 @@ class CreateCouponRequest(BaseModel):
     min_amount: Optional[float] = None
     usage_limit: Optional[int] = None
     expiry_date: Optional[datetime] = None
+    coupon_type: str = "NORMAL" 

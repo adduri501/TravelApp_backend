@@ -97,6 +97,7 @@ async def verify_otp_service(req_body, unit_of_work: UnitOfWork):
             "login_type": "otp",
             "role" : user.role ,
             "is_exist": is_exist,
+            "referral_code": user.referral_code,
             # "profile_update": profile_update,
             "expires_in": 900,
             # "user_id": user_id,

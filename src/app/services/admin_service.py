@@ -6,7 +6,7 @@ from app.common import auth
 from datetime import datetime, timedelta, timezone
 from app.services.otp_service import save_refresh_token
 from app.common.exceptions import ConflictException
-from app.common.exceptions import AppException
+from app.common.exceptions import AppException , NotFoundException
 
 
 async def create_admin(current_user, request, unit_of_work: UnitOfWork):
@@ -192,6 +192,10 @@ async def create_coupon(current_user, request, unit_of_work):
 
         if existing:
             raise AppException(detail="Coupon already exists")
+   
+        valid_types = ["FIRST", "NORMAL", "REFERRAL"]
+        if request.coupon_type not in valid_types:
+            raise AppException(status_code=400, detail="Invalid coupon type")
 
         # 📦 Create coupon
         coupon = await uow.coupon_repo.create({
@@ -238,4 +242,48 @@ async def get_all_coupons(current_user, unit_of_work):
                 }
                 for c in coupons
             ]
+        }
+async def update_coupon(coupon_id, request, current_user, unit_of_work):
+    async with unit_of_work as uow:
+
+        if current_user.get("role") not in ["admin", "super_admin"]:
+            raise AppException(status_code=403, detail="Access denied")
+
+        coupon = await uow.coupon_repo.get_by_id(coupon_id)
+        if not coupon:
+            raise NotFoundException("Coupon not found")
+
+        # update only provided fields
+        update_data = request.dict(exclude_unset=True)
+
+        for key, value in update_data.items():
+            setattr(coupon, key, value)
+
+        await uow.commit()
+
+        return {
+            "success": True,
+            "message": "Coupon updated successfully"
+        }
+        
+async def delete_coupon(coupon_id, current_user, unit_of_work):
+    async with unit_of_work as uow:
+
+        # 🔐 only admin
+        if current_user.get("role") not in ["admin", "super_admin"]:
+            raise AppException(status_code=403, detail="Access denied")
+
+        coupon = await uow.coupon_repo.get_by_id(coupon_id)
+
+        if not coupon:
+            raise NotFoundException("Coupon not found")
+
+        # ✅ soft delete
+        coupon.is_active = False
+
+        await uow.commit()
+
+        return {
+            "success": True,
+            "message": "Coupon deactivated successfully"
         }

@@ -10,6 +10,7 @@ from app.repositories.vehicle_repository import VehicleRepository
 from app.repositories.trip_repository import TripRepository
 from app.repositories.booking_repository import BookingRepository
 from app.repositories.coupon_repository import CouponRepository
+from app.repositories.wallet_repository import WalletRepository
 
 
 class BaseUnitOfWork(abc.ABC):
@@ -52,6 +53,7 @@ class UnitOfWork(BaseUnitOfWork):
         self.trip_repo = TripRepository(self.session)
         self.booking_repo = BookingRepository(self.session)
         self.coupon_repo = CouponRepository(self.session)
+        self.wallet_repo = WalletRepository(self.session)
 
     async def __aenter__(self):
         return await super().__aenter__()

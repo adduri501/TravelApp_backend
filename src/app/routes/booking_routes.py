@@ -15,10 +15,12 @@ booking_route = APIRouter(prefix="/api", tags=["Booking"])
 @booking_route.post("/apply-coupon")
 async def apply_coupon_route(
     request: ApplyCouponRequest,
+    current_user = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
 ):
     return await booking_service.apply_coupon(
         request,
+        current_user,
         UnitOfWork(session=session)
     )
     
@@ -57,3 +59,24 @@ async def cancel_booking_route(
         current_user,
         UnitOfWork(session=session)
     )
+    
+@booking_route.get("/coupons")
+async def get_coupons(
+    current_user = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+):
+    return await booking_service.get_available_coupons(
+        current_user,
+        UnitOfWork(session=session)
+    )
+    
+@booking_route.get("/wallet")
+async def get_wallet(
+    current_user = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+):
+    wallet = await UnitOfWork(session).wallet_repo.get_wallet(current_user["id"])
+
+    return {
+        "balance": wallet.balance if wallet else 0
+    }

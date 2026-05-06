@@ -58,6 +58,8 @@ class UserEntity:
     updated_at: datetime | None = None
     username: str | None = None
     password_hash: str | None = None
+    referral_code: Optional[str] = None
+    referred_by: Optional[str] = None
 
     # Serialization Methods
     def to_dict(self, exclude: Optional[List[str]] = None) -> Dict[str, Any]:
